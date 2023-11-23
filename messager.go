@@ -21,17 +21,7 @@ type PriceHistory struct {
 }
 
 func main() {
-	// Замените на свои учетные данные MongoDB.
-	username := "avito"
-	password := "Cool12211221!$$12"
-
-	// Установите параметры подключения к MongoDB с учетом логина и пароля.
-	clientOptions := options.Client().ApplyURI("mongodb://89.248.206.92:27017").
-		SetAuth(options.Credential{
-			AuthSource: "avito",
-			Username:   username,
-			Password:   password,
-		})
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -108,7 +98,7 @@ func checkAndUpdatePrices(ctx context.Context, collection *mongo.Collection, pri
 
 			// Проверка, что найденная цена не равна максимальной и не равна нулю
 			if minValidPrice != math.MaxFloat64 && minValidPrice != 0 {
-				message := fmt.Sprintf("Наименование: %s, Количество: %d, Наименьшая цена: %.2f, Ссылка: %s", name, count, minValidPrice, link)
+				message := fmt.Sprintf("Наименование: %s, \nКоличество: %d, \nНаименьшая цена: %.2f, \nСсылка: %s", name, count, minValidPrice, link)
 
 				if prevPriceInfo, ok := getPreviousPriceInfo(ctx, priceHistoryCollection, name); ok {
 					// Если цена изменилась более чем на 1%, то обновляем запись
@@ -207,7 +197,7 @@ func findMinPriceWithCondition(prices []float64, links []string) (float64, strin
 		}
 
 		if valid {
-			currentGroup = append(currentGroup, validPriceLinks[i])
+			currentGroup = append(currentGroup, validPriceLinks[i-1])
 		} else {
 			// Если разница в цене более 20%, сохраняем текущую группу и начинаем новую
 			if len(currentGroup) > 0 {
@@ -291,7 +281,7 @@ func getPricesAndLinks(ctx context.Context, collection *mongo.Collection, name s
 
 // Функция для отправки сообщения в Telegram.
 func sendMessageToTelegram(message string) {
-	bot, err := tgbotapi.NewBotAPI("6588492712:AAGtjd0jgWBy0x7r1ESuRk6SzLrprPt4CkU")
+	bot, err := tgbotapi.NewBotAPI("6588492712:AAHr0tK6WvmrAgHYWYq1oSm4sZ5-yRdX_GU")
 	if err != nil {
 		log.Fatal(err)
 	}
